@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import Particles from 'react-particles-js';//引入粒子效果
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button,message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import './Login.css'
+import axios from 'axios'
 export default class Login extends Component {
   state = {
     height: 0
@@ -87,8 +88,21 @@ export default class Login extends Component {
     })
   }
   //提交表单且数据验证成功后回调事件
-  onFinish(values){
-    console.log(values)
+  onFinish = (values) => {
+    //console.log(values)
+    //用户名、密码还有权限状态都满足才能进入
+    axios.get(`http://localhost:5000/users?username=${values.username}&password=${values.password}&roleState=true`).then(res => {
+      console.log(res.data)
+      if (res.data.length === 0) {
+        // console.log('登陆失败')
+        message.info('登陆失败');
+      } else {
+        //成功后将token存入localStorage中
+        localStorage.setItem('token', JSON.stringify(res.data[0]))
+        this.props.history.push("/")
+      }
+
+    })
 
   }
 }

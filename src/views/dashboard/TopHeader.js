@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import {withRouter} from 'react-router'
 import { Layout, Menu, Dropdown,Avatar } from 'antd';
 import {
   MenuUnfoldOutlined,
@@ -7,17 +8,22 @@ import {
 import { UserOutlined } from '@ant-design/icons';
 
 const { Header } = Layout;
-export default class TopHeader extends Component {
+
+class TopHeader extends Component {
   state = {
     collapsed: false
   }
   render() {
+    let {username,roleName} = JSON.parse(localStorage.getItem('token'))
     const menu = (
       <Menu>
         <Menu.Item>
-          超级管理员
+          {roleName}
         </Menu.Item>
-        <Menu.Item danger>退出</Menu.Item>
+        <Menu.Item danger onClick={()=>{
+          this.props.history.replace('/login')//把当前路径替换成/login
+          localStorage.removeItem('token')//清除
+        }}>退出</Menu.Item>
       </Menu>
     );
     return (
@@ -27,7 +33,7 @@ export default class TopHeader extends Component {
           onClick: this.toggle,
         })}
 
-        <div style={{float:"right"}}>欢迎kang回来
+      <div style={{float:"right"}}>欢迎{username}回来
           <Dropdown overlay={menu}>
             {/* Avatar为头像 */}
             <Avatar size="large" icon={<UserOutlined />} />
@@ -42,3 +48,5 @@ export default class TopHeader extends Component {
     })
   }
 }
+
+export default withRouter(TopHeader)

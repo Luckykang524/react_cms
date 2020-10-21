@@ -17,17 +17,20 @@ const menus = [
     path: "/home",//为了点击某一个时，关联路由
     //加单引号会当成字符串，直接写就行（jsx语法）
     icon: <UserOutlined />,
-    title: "首页"
+    title: "首页",
+    permission:[1,2,3]
   },
   {
     path: "/user-manage",
     icon: <TeamOutlined />,
     title: "用户管理",
+    permission:[3],
     children: [
       {
         path: "/user-manage/users",
         icon: <TeamOutlined />,
-        title: "用户列表"
+        title: "用户列表",
+        permission:[3]
       }
     ]
   },
@@ -35,16 +38,19 @@ const menus = [
     path: "/right-manage",
     icon: <UploadOutlined />,
     title: "权限管理",
+    permission:[3],
     children: [
       {
         path: "/right-manage/rights",
         icon: <UploadOutlined />,
-        title: "权限列表"
+        title: "权限列表",
+        permission:[3],
       },
       {
         path: "/right-manage/roles",
         icon: <UploadOutlined />,
-        title: "角色列表"
+        title: "角色列表",
+        permission:[3],
       }
     ]
   },
@@ -52,16 +58,19 @@ const menus = [
     path: "/article-manage",
     icon: <EditOutlined />,
     title: "文章管理",
+    permission:[1,2,3],
     children: [
       {
         path: "/article-manage/list",
         icon: <EditOutlined />,
-        title: "文章列表"
+        title: "文章列表",
+        permission:[1,2,3]
       },
       {
         path: "/article-manage/category",
         icon: <EditOutlined />,
-        title: "文章内容"
+        title: "文章分类",
+        permission:[2,3]
       }
     ]
   }
@@ -98,8 +107,12 @@ class SideMenu extends Component {
   }
 
   renderMenu(menus) {
+    let {roleType} = JSON.parse(localStorage.getItem('token'))
     return menus.map(item => {
       if (item.children) {
+        //添加一个字段实现，根据不同的角色，看到不同的内容
+        //如果permission中包含roleType，则渲染子级菜单
+        if(!item.permission.includes(roleType)) return null
         return <SubMenu key={item.path}
           title={
             <span>
@@ -110,6 +123,7 @@ class SideMenu extends Component {
           {this.renderMenu(item.children)}
         </SubMenu>
       }
+      if(!item.permission.includes(roleType)) return null
       return <Menu.Item key={item.path} icon={item.icon} onClick={() => {
         // console.log(item.path)
         this.props.history.push(item.path) //编程式导航
