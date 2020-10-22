@@ -18,31 +18,39 @@ const { Content } = Layout
 const routes = [
   {
     path: "/home",
-    component: Home
+    component: Home,
+    //有权限才能访问路由，没有的话访问不到
+    permission:[1,2,3]
   },
   {
     path: "/user-manage/users",
-    component: Users
+    component: Users,
+    permission:[3]
   },
   {
     path: "/right-manage/rights",
-    component: Rights
+    component: Rights,
+    permission:[3]
   },
   {
     path: "/right-manage/roles",
-    component: Roles
+    component: Roles,
+    permission:[3]
   },
   {
     path: "/article-manage/list",
-    component: List
+    component: List,
+    permission:[1,2,3]
   },
   {
     path: "/article-manage/category",
-    component: Category
+    component: Category,
+    permission:[2,3]
   },
 ]
 export default class Dashboard extends Component {
   render() {
+    let {roleType} = JSON.parse(localStorage.getItem("token"))
     return (
       <Layout>
         <SideMenu></SideMenu>
@@ -53,7 +61,7 @@ export default class Dashboard extends Component {
             style={{
               margin: '24px 16px',
               padding: 24,
-              minHeight: 280,
+              minHeight: 'auto',
             }}
           >
 
@@ -64,8 +72,10 @@ export default class Dashboard extends Component {
           <Route path="/right-manage/rights" component={Rights}></Route>
           <Route path="/right-manage/roles" component={Roles}></Route> */}
               {
-                routes.map(item =>
-                  <Route key={item.path} path={item.path} component={item.component}></Route>)
+                routes.map(item =>{
+                  if(!item.permission.includes(roleType)) return null
+                  return  <Route key={item.path} path={item.path} component={item.component}></Route>
+                })
               }
               <Redirect from="/" to="/home" exact></Redirect>
               <Route path="*" component={Error}></Route>
