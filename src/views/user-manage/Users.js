@@ -6,10 +6,13 @@ export default class Users extends Component {
   state = {
     list: [],
     visibleAdd : false,
+    visibleUpdate:false,
     roleList :[],
     loading:false
   }
   addForm = React.createRef()
+  updateForm = React.createRef()
+  currentUpdate = null//记录正在更新的item
   render() {
 
     const columns = [
@@ -34,7 +37,7 @@ export default class Users extends Component {
         render: (item) => {
           return <div>
             <Button danger onClick={() => this.handleDelete(item.id)} disabled={item.default}>删除</Button>
-            <Button type="primary" disabled={item.default}>更新</Button>
+            <Button type="primary" disabled={item.default} onClick={()=>this.handleUpdate(item)}>更新</Button>
           </div>
         }
       }
@@ -90,6 +93,52 @@ export default class Users extends Component {
             </Form.Item>
           </Form>
         </Modal>
+        <Modal
+          visible={this.state.visibleUpdate}
+          title="更新用户"
+          okText="确定"
+          cancelText="取消"
+          onCancel={()=>{
+            this.setState({
+              visibleUpdate : false
+            })
+          }}
+          onOk={this.handleUpdateOk}
+        >
+          <Form
+            // 使用ref实例获取到输入的值
+            ref={this.updateForm}
+            layout="vertical"
+            name="form_in_modal"
+          >
+            <Form.Item
+              name="username"
+              label="用户名"
+              rules={[{ required: true, message: '用户名不能为空' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              label="密码"
+              rules={[{ required: true, message: '密码不能为空' }]}
+            >
+              <Input type="password"/>
+            </Form.Item>
+            <Form.Item
+              name="roleType"
+              label="角色"
+              rules={[{ required: true, message: '请选择一个角色' }]}
+            >
+              <Select>
+                {
+                  this.state.roleList.map(item=>
+                  <Option key={item.id} value={item.roleType}>{item.roleName}</Option>)
+                }
+              </Select>
+            </Form.Item>
+          </Form>
+        </Modal>
       </div>
     )
   }
@@ -98,6 +147,7 @@ export default class Users extends Component {
       this.setState({
         list: res.data
       })
+      
     })
     axios.get('http://localhost:5000/roles').then(res=>{
       this.setState({
@@ -172,4 +222,56 @@ export default class Users extends Component {
         roleState:!item.roleState
     })
   }
+  handleUpdate = (item)=>{
+    //用于更新时，得到id，放在全局中，将修改的值存储到
+    this.currentUpdate = item
+    //要保证模态框创建完成后，再获取实例,要不然不会报错
+    let {username,password,roleType} = item
+    setTimeout(() => {
+      this.setState({
+        visibleUpdate : true
+      })
+      //点击更新，数据回显
+      this.updateForm.current.setFieldsValue({
+        username,
+        password,
+        roleType
+      })
+    }, 0);
+  }
+  //更新模态框中的确定按钮()
+  handleUpdateOk = ()=>{
+    this.updateForm.current.validateFields().then(values=>{
+      //找到roleType对应的roleName值
+      let roleName = this.state.roleList.filter(item=>item.roleType===values.roleType)[0].roleName
+      this.setState({
+        list : this.state.list.map(item=>{
+          if(item.id === this.currentUpdate.id){
+            return {
+              ...item,
+              ...values,
+              roleName
+            }
+          }
+          return item
+        }),
+        visibleUpdate : false
+      })
+      //更新对应id的数据
+      axios.put(`http://localhost:5000/users/${this.currentUpdate.id}`,{
+          ...this.currentUpdate,
+          ...values,
+          roleName
+      })
+    })
+  }
 }
+/* 弹出模态框---更新数据的逻辑
+    1.点击更新按钮将数据进行回显 将id设置为全局的
+      使用ref实例下面的setFieldsValue()进行回显
+    2.获取更新的值，使用全局的id修改数据
+      1）验证所录入的信息ref实例下面的validateFields()验证成功则返回录入的值
+      2）获取到更改的值
+          roleName需要进行处理才能得到
+      3）根据id发送put请求
+ */

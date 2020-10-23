@@ -8,6 +8,8 @@ import Error from '../error/Error'
 import Rights from '../right-manage/Rights'
 import Roles from '../right-manage/Roles'
 import List from '../article-manage/List'
+import Create from '../article-manage/Create'
+import Update from '../article-manage/Update'
 import Category from '../article-manage/Category'
 
 import { Layout } from 'antd'
@@ -40,6 +42,16 @@ const routes = [
   {
     path: "/article-manage/list",
     component: List,
+    permission:[1,2,3]
+  },
+  {
+    path: "/article-manage/create",
+    component: Create,
+    permission:[1,2,3]
+  },
+  {
+    path: "/article-manage/update/:id",
+    component: Update,
     permission:[1,2,3]
   },
   {

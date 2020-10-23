@@ -84,6 +84,10 @@ class SideMenu extends Component {
     //以/为分隔符，分割成数组 /right-manage/rights" -> ["", "right-manage", "rights"]
     let openKeys = ['/'+ this.props.location.pathname.split('/')[1]]
     let selectKeys = [this.props.location.pathname]
+    //当添加新文章时,文章列表高亮显示
+    if(this.props.location.pathname.includes("/article-manage") && !this.props.location.pathname.includes("category")){
+      selectKeys= ['/article-manage/list']
+    }
     return (
       <Sider trigger={null} collapsible collapsed={this.state.collapsed}>
         <div style={{ color: "white", textAlign: "center" }}>内容管理系统</div>
