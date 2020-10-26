@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Button, Tag,Table } from 'antd'
-import axios from 'axios';
+import store from '../../redux/store'
+import ListAction from '../../redux/actionCreator/ListAction'
 export default class Roles extends Component {
   state = {
     list: []
@@ -47,11 +48,26 @@ export default class Roles extends Component {
     )
   }
   componentDidMount() {
-    axios.get('http://localhost:5000/roles').then(res => {
+    if(store.getState().ListReducer.List.length === 0){
+      //dispatch会等待promise对象执行完，再给reducer
+      store.dispatch(ListAction())
+    }else{
+      //console.log("缓存")
       this.setState({
-        list: res.data
+        list :store.getState().ListReducer.List
+      })
+    }
+
+    //订阅者订阅  订阅者和发布者是一个人
+    this.unscribe = store.subscribe(()=>{
+      console.log("第一次",store.getState().ListReducer.List)
+      this.setState({
+        list :store.getState().ListReducer.List
       })
     })
+  }
+  componentWillUnmount(){
+    this.unscribe()
   }
   handleDelete(id){
     this.setState({
