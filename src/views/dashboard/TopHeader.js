@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import {withRouter} from 'react-router'
 import { Layout, Menu, Dropdown,Avatar } from 'antd';
+import store from '../../redux/store'
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
@@ -46,7 +47,12 @@ class TopHeader extends Component {
     this.setState({
       collapsed: !this.state.collapsed
     })
+    //发布action--必须是对象形式 必须有一个名为type的属性，属性值为任意唯一值
+    store.dispatch({
+      type:"CMS_CHANGE_COLLAPSED"
+    })
   }
+  
 }
 
 export default withRouter(TopHeader)

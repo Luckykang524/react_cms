@@ -8,6 +8,7 @@ import {
   UploadOutlined,
   EditOutlined
 } from '@ant-design/icons';
+import store from '../../redux/store';
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -89,6 +90,7 @@ class SideMenu extends Component {
       selectKeys= ['/article-manage/list']
     }
     return (
+      //不可以直接将取出的值给collapsed属性，react没有set get拦截，直接在这写不会触发更新；变成自己的状态才可以实现每次值改变后重新渲染
       <Sider trigger={null} collapsible collapsed={this.state.collapsed}>
         <div style={{ color: "white", textAlign: "center" }}>内容管理系统</div>
         <Menu theme="dark" mode="inline" defaultOpenKeys={openKeys} selectedKeys={selectKeys}>
@@ -135,6 +137,19 @@ class SideMenu extends Component {
         {item.title}
       </Menu.Item>
     })
+  }
+  componentDidMount(){
+    //订阅函数的返回值是取消订阅的函数
+    this.unscribe = store.subscribe(()=>{
+      this.setState({
+        collapsed :store.getState().isCollapsed
+      })
+    })
+  }
+
+  componentWillUnmount(){
+    //执行取消订阅
+    this.unscribe()
   }
 }
 
