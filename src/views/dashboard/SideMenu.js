@@ -142,7 +142,10 @@ class SideMenu extends Component {
     //订阅函数的返回值是取消订阅的函数
     this.unscribe = store.subscribe(()=>{
       this.setState({
-        collapsed :store.getState().isCollapsed
+        //未拆分的写法
+        //collapsed :store.getState().isCollapsed
+        //拆分的写法
+        collapsed :store.getState().CollapsedReducer.isCollapsed
       })
     })
   }
