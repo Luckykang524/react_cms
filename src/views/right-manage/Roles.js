@@ -1,11 +1,9 @@
 import React, { Component } from 'react'
 import { Button, Tag,Table } from 'antd'
-import store from '../../redux/store'
 import ListAction from '../../redux/actionCreator/ListAction'
-export default class Roles extends Component {
-  state = {
-    list: []
-  }
+import {connect} from 'react-redux'
+class Roles extends Component {
+ 
   render() {
     const columns = [
       {
@@ -28,7 +26,7 @@ export default class Roles extends Component {
     ];
     return (
       <div>
-        <Table columns={columns} dataSource={this.state.list} rowKey={item => item.id}
+        <Table columns={columns} dataSource={this.props.list} rowKey={item => item.id}
           expandable={{
             expandedRowRender: item => <div>
               {item.roleRight.map((data,index)=>
@@ -48,31 +46,29 @@ export default class Roles extends Component {
     )
   }
   componentDidMount() {
-    if(store.getState().ListReducer.List.length === 0){
-      //dispatch会等待promise对象执行完，再给reducer
-      store.dispatch(ListAction())
+    if(this.props.list.length === 0){
+      this.props.ListAction()
     }else{
-      //console.log("缓存")
       this.setState({
-        list :store.getState().ListReducer.List
+        list :this.props.list
       })
     }
+  }
 
-    //订阅者订阅  订阅者和发布者是一个人
-    this.unscribe = store.subscribe(()=>{
-      console.log("第一次",store.getState().ListReducer.List)
-      this.setState({
-        list :store.getState().ListReducer.List
-      })
-    })
-  }
-  componentWillUnmount(){
-    this.unscribe()
-  }
   handleDelete(id){
     this.setState({
-      list:this.state.list.filter(item=>item.id!==id)
+      list:this.props.list.filter(item=>item.id!==id)
   })
   // axios.delete(`http://localhost:5000/rights/${id}`)
   }
 }
+const mapStateToProps = (storestate)=>{
+  return {
+    list :storestate.ListReducer.List
+  }
+}
+const mapDispatchToProps = {
+  ListAction
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(Roles)

@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import {withRouter} from 'react-router'
 import { Layout, Menu, Dropdown,Avatar } from 'antd';
-import store from '../../redux/store'
+import CollapsedAction from '../../redux/actionCreator/CollapsedAction'
+import {connect} from 'react-redux'
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
@@ -11,9 +12,6 @@ import { UserOutlined } from '@ant-design/icons';
 const { Header } = Layout;
 
 class TopHeader extends Component {
-  state = {
-    collapsed: false
-  }
   render() {
     let {username,roleName} = JSON.parse(localStorage.getItem('token'))
     const menu = (
@@ -29,7 +27,7 @@ class TopHeader extends Component {
     );
     return (
       <Header className="site-layout-background" style={{ padding: '0 16px' }}>
-        {React.createElement(this.state.collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
+        {React.createElement(this.props.isCollapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
           className: 'trigger',
           onClick: this.toggle,
         })}
@@ -44,15 +42,21 @@ class TopHeader extends Component {
     )
   }
   toggle = () => {
-    this.setState({
-      collapsed: !this.state.collapsed
-    })
-    //发布action--必须是对象形式 必须有一个名为type的属性，属性值为任意唯一值
-    store.dispatch({
-      type:"CMS_CHANGE_COLLAPSED"
-    })
+    //执行这条语句，父组件便会dispatch 这个函数CollapsedAction
+    this.props.CollapsedAction()
   }
-  
+}
+const mapStateToProps = (storestate)=>{
+  return {
+    //子组件需要使用isCollapsed，因此要传给子组件
+    isCollapsed: storestate.CollapsedReducer.isCollapsed
+  }
 }
 
-export default withRouter(TopHeader)
+const mapDispatchToProps = {
+  //让父组件dispatch的内容
+  CollapsedAction:CollapsedAction
+}
+
+export default withRouter(connect(mapStateToProps,mapDispatchToProps)(TopHeader))
+//被connect包装后，自己的组件没有状态，叫做UI组件或无状态组件，connect叫做容器

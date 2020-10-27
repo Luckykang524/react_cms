@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Layout, Menu } from 'antd';
+import {connect} from 'react-redux'
 import { withRouter } from 'react-router'
 //导入icon图标，使用哪个导入哪个
 import {
@@ -8,7 +9,7 @@ import {
   UploadOutlined,
   EditOutlined
 } from '@ant-design/icons';
-import store from '../../redux/store';
+
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -78,9 +79,7 @@ const menus = [
 ]
 
 class SideMenu extends Component {
-  state = {
-    collapsed: false
-  }
+  
   render() {
     //以/为分隔符，分割成数组 /right-manage/rights" -> ["", "right-manage", "rights"]
     let openKeys = ['/'+ this.props.location.pathname.split('/')[1]]
@@ -91,7 +90,7 @@ class SideMenu extends Component {
     }
     return (
       //不可以直接将取出的值给collapsed属性，react没有set get拦截，直接在这写不会触发更新；变成自己的状态才可以实现每次值改变后重新渲染
-      <Sider trigger={null} collapsible collapsed={this.state.collapsed}>
+      <Sider trigger={null} collapsible collapsed={this.props.isCollapsed}>
         <div style={{ color: "white", textAlign: "center" }}>内容管理系统</div>
         <Menu theme="dark" mode="inline" defaultOpenKeys={openKeys} selectedKeys={selectKeys}>
           {/*使用这个defaultSelectedKeys的话，只能保证初始值,以后就非受控了;以后值改变也不会受影响;在menu源码中,只在cdm中接收
@@ -138,22 +137,19 @@ class SideMenu extends Component {
       </Menu.Item>
     })
   }
-  componentDidMount(){
-    //订阅函数的返回值是取消订阅的函数
-    this.unscribe = store.subscribe(()=>{
-      this.setState({
-        //未拆分的写法
-        //collapsed :store.getState().isCollapsed
-        //拆分的写法
-        collapsed :store.getState().CollapsedReducer.isCollapsed
-      })
-    })
-  }
-
-  componentWillUnmount(){
-    //执行取消订阅
-    this.unscribe()
-  }
 }
 
-export default withRouter(SideMenu)
+//先使用connect包装SideMenu，为了给SideMenu干爹供应父传子的状态
+  //connect语法： connect()(SideMenu)--connect执行完的返回值是一个函数,第二个括号执行返回值函数
+//在使用withRouter包装。为了提供this.props下的方法
+
+const mapStateToProps = (storestate)=>{
+  console.log('我是全局的store',storestate)
+  return {
+    //里面写啥就会传给子组件啥
+    //只关注自己的就行
+    isCollapsed: storestate.CollapsedReducer.isCollapsed
+
+  }
+}
+export default withRouter(connect(mapStateToProps)(SideMenu))
